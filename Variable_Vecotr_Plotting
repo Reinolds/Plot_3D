@@ -1,0 +1,85 @@
+'''
+Created on Aug 19, 2017
+
+@author: Amaterasu - Zorro
+'''
+
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+
+#Figure parameters
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+ax.set_xlabel('X axis')
+ax.set_ylabel('Y axis')
+ax.set_zlabel('Z axis')
+
+ax.set_xlim(0, 11000)
+ax.set_ylim(0, 11000)
+ax.set_zlim(0, 11000)
+
+
+#Initial data
+
+x = [5000]
+y = [5000]
+z = [0]
+i = 0
+
+total = 0
+
+
+#Function for emulating incoming data
+
+def increase(x,y,z):
+    x = x + [3000*np.sin(2*np.pi*i/10)+5000]
+    y = y + [3000*np.cos(2*np.pi*i/10)+5000]
+    z = z + [i*600]
+    return x,y,z
+
+
+#Function for plotting each trace and its point with time
+
+def plot(x,y,z):
+    ax.plot(x,y,z,label='Followed Trajectory',color='blue',lw=1)
+    if i<=0:
+        ax.legend()
+    label = '(%d,%d,%d),time=%s'%(x[i],y[i],z[i],i)
+    ax.text(x[i],y[i],z[i],label,color='red')
+    plt.draw()
+    plt.pause(0.5)
+
+
+#Function for total distance calculation
+    
+def distance(x,y,z,total):
+    if len(x) >=1:
+        xdif = x[i] - x[i-1]
+        ydif = y[i] - y[i-1]
+        zdif = z[i] - z[i-1]
+        mid = math.pow(xdif,2)+math.pow(ydif,2)+math.pow(zdif,2)
+        total = total+math.sqrt(mid)
+    else:
+        total = 0
+    return total
+
+#Testing all functions 
+ 
+for i in range (0,20):   
+    x,y,z = increase(x,y,z)
+    plot(x,y,z)
+    total = distance(x,y,z,total)
+
+    print "Distance %d [mm]" % total
+
+plt.show() #Used to stop the run
+
+print 'Done'
+    
+    
