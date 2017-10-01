@@ -1,0 +1,58 @@
+'''
+Created on Aug 17, 2017
+
+@author: Amaterasu - Zorro
+'''
+
+import matplotlib as mpl
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+#Variables and the size thing
+
+total = 0
+mpl.rcParams['legend.fontsize'] = 12
+
+#Figure parameters
+
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+
+ax.set_xlabel('X axis')
+ax.set_ylabel('Y axis')
+ax.set_zlabel('Z axis')
+
+ax.set_xlim(0, 11000)
+ax.set_ylim(0, 11000)
+ax.set_zlim(0, 11000)
+
+#Data for test
+
+xs = [0, 1000, 4000, 7000, 4000, 5000, 6000, 10000]
+ys = [0, 1000, 4000, 5000, 7000, 8000, 4000, 10000]
+zs = [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000]
+ts = [0, 1, 2, 3, 4, 5, 6, 7]
+
+#Algoritm for distance
+
+for i in range (1, 8):
+    xdif = xs[i]-xs[i-1]
+    ydif = ys[i]-ys[i-1]
+    zdif = zs[i]-zs[i-1]
+    mid = math.pow(xdif,2) + math.pow(ydif,2) + math.pow(zdif,2)
+    total = total + math.sqrt(mid)
+    
+    
+#Position Labeling and plotting
+
+for t, x, y, z in zip(ts, xs, ys, zs):
+    label = '(%d, %d, %d), time=%s' % (x,y,z,t)
+    ax.text(x,y,z,label,color='red')
+
+ax.text2D(0.05, 0.95, "Distance %d [mm]" % total, transform=ax.transAxes)
+ax.plot(xs, ys, zs, label='Awesome test',color='blue',lw=2)
+ax.legend()
+
+plt.show()
