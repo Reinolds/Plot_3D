@@ -1,17 +1,35 @@
 '''
-Created on Aug 19, 2017
 
+Created on Aug 19, 2017
 @author: Amaterasu - Zorro
+
 '''
 
+
+# Libraries
+# Used for the program (not all are used).
+
 import matplotlib as mpl
+
 from mpl_toolkits.mplot3d import Axes3D
+
 import numpy as np
+
 import matplotlib.pyplot as plt
+
 import math
 
+import serial
 
-#Figure parameters
+
+# Serial communication parameters
+# Remember that those must match the ones of the Arduino.
+
+ser = serial.Serial('COM3', 115200)
+
+
+# Figure parameters
+# Those are axis names and range limits, a definition of the figure is here as well.
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
@@ -25,7 +43,10 @@ ax.set_ylim(0, 11000)
 ax.set_zlim(0, 11000)
 
 
-#Initial data
+# Initial data
+# Here we have the initial values. Be careful for x,y,z as those values are the initial position,
+# you must change them according to your Anchors positions. "i" is just the position index in the arrays that
+# we use for math operations.
 
 x = [5000]
 y = [5000]
@@ -35,51 +56,82 @@ i = 0
 total = 0
 
 
-#Function for emulating incoming data
+# Function for emulating incoming data
+# The commented lines were data for testing without real input data. The NOT commented lines are the real input data
+# from the Arduino with the pozyx tag. IMPORTANT: if you stop a moment, you'll see that x,y,z are used as lists!!.
 
 def increase(x,y,z):
-    x = x + [3000*np.sin(2*np.pi*i/10)+5000]
-    y = y + [3000*np.cos(2*np.pi*i/10)+5000]
-    z = z + [i*600]
+    #x = x + [3000*np.sin(2*np.pi*i/10)+5000]
+    #y = y + [3000*np.cos(2*np.pi*i/10)+5000]
+    #z = z + [i*600]
+
+    x = x + [int(ser.readline())]
+    y = y + [int(ser.readline())]
+    z = z + [int(ser.readline())]
+
     return x,y,z
 
-
-#Function for plotting each trace and its point with time
+# Function for plotting each trace and its point with time
+# This one is tricky, first we define the plot parameters and then decide to include the legend ONCE. After that
+# we add the coordinates to each point to be plotted and finally we draw them with a pause of 0.5s between them.
 
 def plot(x,y,z):
+
     ax.plot(x,y,z,label='Followed Trajectory',color='blue',lw=1)
+
     if i<=0:
+
         ax.legend()
+
     label = '(%d,%d,%d),time=%s'%(x[i],y[i],z[i],i)
+
     ax.text(x[i],y[i],z[i],label,color='red')
+
     plt.draw()
+
     plt.pause(0.5)
 
 
-#Function for total distance calculation
-    
+# Function for total distance calculation
+# We use a Pythagoras 3D math formula. Here you can see that we use "i" as index.
+
 def distance(x,y,z,total):
+
     if len(x) >=1:
+
         xdif = x[i] - x[i-1]
+
         ydif = y[i] - y[i-1]
+
         zdif = z[i] - z[i-1]
+
         mid = math.pow(xdif,2)+math.pow(ydif,2)+math.pow(zdif,2)
+
         total = total+math.sqrt(mid)
+
     else:
+
         total = 0
+
     return total
 
-#Testing all functions 
- 
-for i in range (0,20):   
+
+# Testing all functions
+# Self explained. Here all functions are used for plotting the data and the coordinates and total distance are
+# shown in the console (python, not Arduino). If you want a "forever run" you need to change "for" for a "while true:".
+# The plt.show() line is for stopping the process once all plotting is done.
+
+for i in range (0,200):
+
     x,y,z = increase(x,y,z)
     plot(x,y,z)
     total = distance(x,y,z,total)
 
+    print "X: %d" % x[i]
+    print "Y: %d" % y[i]
+    print "Z: %d" % z[i]
     print "Distance %d [mm]" % total
 
 plt.show() #Used to stop the run
 
 print 'Done'
-    
-    
